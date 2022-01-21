@@ -16,8 +16,132 @@ jobs:
     outputs:
       prefix: ${{ steps.derive-prefix.outputs.sha-subset }}
 
+  deploy_rg_terraform:
+    name: "Deploy Resource Group"
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./terraform/resource_group
+    env:
+      ARM_CLIENT_ID: ${{ secrets.NON_PROD_ARM_CLIENT_ID_2 }}
+      ARM_CLIENT_SECRET: ${{ secrets.NON_PROD_ARM_CLIENT_SECRET_2 }}
+      ARM_SUBSCRIPTION_ID: 3f54ae6e-1d36-468f-8de3-7cae0b2d1845
+      ARM_TENANT_ID: ${{ secrets.NON_PROD_ARM_TENANT_ID_2 }}
+      TF_INPUT: false
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v2
+
+      - name: "Setup Terraform"
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 0.14.7
+          terraform_wrapper: false
+
+      - name: "Terraform Init"
+        run: |
+          terraform init -lock-timeout=15m -backend-config="./backends/dev.backend"
+
+      - name: "Terraform Validate"
+        run: terraform validate -no-color
+
+      - name: "Terraform Plan"
+        id: rg-plan
+        run: |
+          terraform plan \
+            -lock-timeout=15m \
+            -var-file="./var-files/dev.tfvars" \
+            -out="dev-rg-plan.tfplan"
+
+      - name: "Copy TF plan to reports dir"
+        if: always()
+        run: |
+          mkdir -p ../../terraform_plans/dev
+          cp dev-rg-plan.tfplan ../../terraform_plans/dev
+
+      - name: "Upload Terraform plan"
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: reports
+          retention-days: 5
+          path: |
+            **/terraform_plans
+
+      - name: "Terraform Apply"
+        run: |
+          terraform apply \
+            -lock-timeout=15m \
+            -auto-approve \
+            dev-rg-plan.tfplan
+
   deploy_b2c_terraform:
-    name: "Deploy B2C Application"
+    name: "Deploy Resource Group"
+    runs-on: ubuntu-latest
+    needs:
+      - deploy_rg_terraform
+      - derive_environment_prefix
+
+    defaults:
+      run:
+        working-directory: ./terraform/b2c
+    env:
+      ARM_CLIENT_ID: ${{ secrets.NON_PROD_ARM_CLIENT_ID_2 }}
+      ARM_CLIENT_SECRET: ${{ secrets.NON_PROD_ARM_CLIENT_SECRET_2 }}
+      ARM_SUBSCRIPTION_ID: 3f54ae6e-1d36-468f-8de3-7cae0b2d1845
+      ARM_TENANT_ID: ${{ secrets.NON_PROD_ARM_TENANT_ID_2 }}
+      TF_INPUT: false
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v2
+
+      - name: "Setup Terraform"
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 0.14.7
+          terraform_wrapper: false
+
+      - name: "Terraform Init"
+        run: |
+          terraform init -lock-timeout=15m -backend-config="./backends/dev.backend"
+
+      - name: "Terraform Validate"
+        run: terraform validate -no-color
+
+      - name: "Terraform Plan"
+        id: rg-plan
+        run: |
+          terraform plan \
+            -lock-timeout=15m \
+            -var-file="./var-files/dev.tfvars" \
+            -out="dev-rg-plan.tfplan"
+
+      - name: "Copy TF plan to reports dir"
+        if: always()
+        run: |
+          mkdir -p ../../terraform_plans/dev
+          cp dev-rg-plan.tfplan ../../terraform_plans/dev
+
+      - name: "Upload Terraform plan"
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: reports
+          retention-days: 5
+          path: |
+            **/terraform_plans
+
+      - name: "Terraform Apply"
+        run: |
+          terraform apply \
+            -lock-timeout=15m \
+            -auto-approve \
+            dev-rg-plan.tfplan
+
+
+  deploy_b2c_app_terraform:
+    name: "Deploy B2C application"
     runs-on: ubuntu-latest
     needs:
       - derive_environment_prefix

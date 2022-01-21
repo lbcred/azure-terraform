@@ -1,0 +1,2 @@
+resource_group_name = "rg-uks-staging-tfstates-dh"
+key = "mytswspike/rg/terraform.tfstate"
