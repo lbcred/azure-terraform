@@ -29,6 +29,7 @@ jobs:
       ARM_CLIENT_ID: ${{ secrets.NON_PROD_ARM_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.NON_PROD_ARM_CLIENT_SECRET }}
       ARM_TENANT_ID: ${{ secrets.NON_PROD_ARM_TENANT_ID }}
+      TF_INPUT: false
     steps:
       - name: "Checkout"
         uses: actions/checkout@v2
