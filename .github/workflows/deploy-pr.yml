@@ -13,19 +13,12 @@ jobs:
           filters: |
             pipelines:
               - '.github/workflows/**'
-            tf_resource_group:
-              - 'terraform/resource_group/**'
-              - 'terraform/modules/**'
-            tf_apim:
-              - 'terraform/apim/**'
-              - 'terraform/modules/**'
-            tf_infra:
-              - 'terraform/frontend/**'
-              - 'terraform/backend/**'
-              - 'terraform/modules/**'
+            tf_b2c:
+              - 'terraform/**'
 
     outputs:
       has_pipeline_changes: ${{ steps.changes.outputs.pipelines }}
+      has_b2c_changes: ${{ steps.changes.outputs.tf_b2c }}
 
   derive_environment_prefix:
     name: "Derive environment prefix"
@@ -40,22 +33,18 @@ jobs:
     outputs:
       prefix: ${{ steps.derive-prefix.outputs.sha-subset }}
 
-  deploy_rg_terraform:
-    name: "Deploy Resource Group"
-    if: needs.detect_changes.outputs.has_tf_resource_group_changes == 'true' || needs.detect_changes.outputs.has_pipeline_changes == 'true'
+  deploy_b2c_terraform:
+    name: "Deploy B2C Application"
+    if: needs.detect_changes.outputs.has_tf_b2c_changes == 'true'
     runs-on: ubuntu-latest
     needs:
       - detect_changes
 
     defaults:
       run:
-        working-directory: ./terraform/resource_group
+        working-directory: ./terraform/
     env:
       ARM_CLIENT_ID: ${{ secrets.NON_PROD_ARM_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.NON_PROD_ARM_CLIENT_SECRET }}
-      ARM_SUBSCRIPTION_ID: 93b71b78-b75b-4806-8282-97b9e70ae16c
-      ARM_TENANT_ID: ${{ secrets.NON_PROD_ARM_TENANT_ID }}
-      TF_INPUT: false
     steps:
       - name: "Checkout"
         uses: actions/checkout@v2
@@ -68,7 +57,7 @@ jobs:
 
       - name: "Terraform Init"
         run: |
-          terraform init -lock-timeout=15m -backend-config="./backends/dev.backend"
+          terraform init -lock-timeout=15m
 
       - name: "Terraform Validate"
         run: terraform validate -no-color
