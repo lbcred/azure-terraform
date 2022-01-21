@@ -26,10 +26,7 @@ jobs:
       run:
         working-directory: ./terraform/
     env:
-      ARM_CLIENT_ID: ${{ secrets.NON_PROD_ARM_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.NON_PROD_ARM_CLIENT_SECRET }}
-      ARM_TENANT_ID: ${{ secrets.NON_PROD_ARM_TENANT_ID }}
-      ARM_SUBSCRIPTION_ID: 3f54ae6e-1d36-468f-8de3-7cae0b2d1845
+      TF_VAR_client_secret: ${{ secrets.NON_PROD_ARM_CLIENT_SECRET }}
       TF_INPUT: false
     steps:
       - name: "Checkout"
