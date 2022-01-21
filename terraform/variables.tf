@@ -4,6 +4,6 @@ variable "environment_prefix" {
 }
 
 variable "client_secret" {
-  typ         = string
+  type         = string
   description = "The client secret used to authenticate to Azure AD"
 }
