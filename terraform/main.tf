@@ -1,10 +1,3 @@
-# Configure the Azure Active Directory Provider
-provider "azuread" {
-  client_id = "cdc060bc-0de4-4a87-9b5a-ebfab4c53fdd"
-  client_secret = var.client_secret
-  tenant_id = "28b45348-a97d-4eae-a79c-b3945018437a"
-}
-
 # Retrieve domain information
 data "azuread_domains" "default" {
   only_initial = true

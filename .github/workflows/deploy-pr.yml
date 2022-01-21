@@ -26,7 +26,9 @@ jobs:
       run:
         working-directory: ./terraform/
     env:
+      ARM_CLIENT_ID: ${{ secrets.NON_PROD_ARM_CLIENT_ID }}
       TF_VAR_client_secret: ${{ secrets.NON_PROD_ARM_CLIENT_SECRET }}
+      ARM_TENANT_ID: ${{ secrets.NON_PROD_ARM_TENANT_ID }}
       TF_INPUT: false
     steps:
       - name: "Checkout"
