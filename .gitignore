@@ -3,7 +3,10 @@
 *.tfstate.*
 
 #Local .terraform directories
-**/.terraform/*
+terraform/.terraform/providers
 
 #IntelliJ .idea folder
 .idea
+
+#
+.DS_Store
